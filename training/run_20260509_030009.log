@@ -1,0 +1,251 @@
+03:00:09 | INFO     | =================================================================
+03:00:09 | INFO     |   FinSense — FinBERT Fine-Tuning
+03:00:09 | INFO     | =================================================================
+03:00:09 | INFO     |   Started at   : 2026-05-09 03:00:09
+03:00:09 | INFO     |   Model        : ProsusAI/finbert
+03:00:09 | INFO     |   Max length   : 128 tokens
+03:00:09 | INFO     |   Batch size   : 16
+03:00:09 | INFO     |   Epochs       : 5
+03:00:09 | INFO     |   Learning rate: 2e-05
+03:00:09 | INFO     |   Weight decay : 0.01
+03:00:09 | INFO     |   Warmup ratio : 0.10
+03:00:09 | INFO     |   Seed         : 42
+03:00:09 | INFO     |   Log file     : /Users/arin/Documents/Finance/training/run_20260509_030009.log
+03:00:09 | INFO     | ── System ─────────────────────────────────────────────────
+03:00:09 | INFO     |   Python  : 3.11.9
+03:00:09 | INFO     |   PyTorch : 2.9.1
+03:00:09 | INFO     |   Transformers: 4.57.3
+03:00:09 | INFO     |   Device  : mps
+03:00:09 | INFO     |   Backend : Apple Metal Performance Shaders (MPS)
+03:00:09 | INFO     | =================================================================
+03:00:09 | INFO     |   1 / 6  — Data Loading
+03:00:09 | INFO     | =================================================================
+03:00:09 | INFO     |   Reading: /Users/arin/Documents/Finance/data/financial_phrasebank.csv
+03:00:09 | INFO     |   Loaded 2264 rows in 0.01s
+03:00:09 | INFO     |   Columns : ['sentence', 'label']
+03:00:09 | INFO     |   Dtypes  : {'sentence': dtype('O'), 'label': dtype('int64')}
+03:00:09 | INFO     |   Nulls   : {'sentence': 0, 'label': 0}
+03:00:09 | INFO     |   Label distribution:
+03:00:09 | INFO     |     [0] negative →  303 samples (13.4%)
+03:00:09 | INFO     |     [1] neutral  → 1391 samples (61.4%)
+03:00:09 | INFO     |     [2] positive →  570 samples (25.2%)
+03:00:09 | INFO     | =================================================================
+03:00:09 | INFO     |   2 / 6  — Train / Val / Test Split  (70 / 15 / 15)
+03:00:09 | INFO     | =================================================================
+03:00:09 | INFO     |   Total   : 2264
+03:00:09 | INFO     |   Train   : 1584 (70.0%)
+03:00:09 | INFO     |   Val     : 340   (15.0%)
+03:00:09 | INFO     |   Test    : 340   (15.0%)
+03:00:09 | INFO     |   train labels: {'negative': 212, 'neutral': 973, 'positive': 399}
+03:00:09 | INFO     |   val   labels: {'negative': 45, 'neutral': 209, 'positive': 86}
+03:00:09 | INFO     |   test  labels: {'negative': 46, 'neutral': 209, 'positive': 85}
+03:00:09 | INFO     | =================================================================
+03:00:09 | INFO     |   3 / 6  — Tokenizer
+03:00:09 | INFO     | =================================================================
+03:00:09 | INFO     |   Loading tokenizer from: ProsusAI/finbert
+03:00:10 | INFO     |   Tokenizer loaded in 1.55s
+03:00:10 | INFO     |   Vocab size     : 30,522
+03:00:10 | INFO     |   Max model len  : 512
+03:00:10 | INFO     |   Padding token  : '[PAD]' (id=0)
+03:00:10 | INFO     |   CLS token      : '[CLS]' (id=101)
+03:00:10 | INFO     |   SEP token      : '[SEP]' (id=102)
+03:00:10 | INFO     |   Using max_len  : 128 (truncation + padding)
+03:00:10 | INFO     |   Sample sentence: "The Oxyview Pulse Oximeter is a common device to check patient blood-oxygen satu..."
+03:00:10 | INFO     |   Token count    : 26
+03:00:10 | INFO     |   Token ids (first 10): [101, 1996, 23060, 2100, 8584, 8187, 23060, 19198, 2003, 1037]
+03:00:10 | INFO     |   Tokenizing [train] — 1584 samples...
+03:00:11 | INFO     |     input_ids shape     : (1584, 128)
+03:00:11 | INFO     |     attention_mask shape: (1584, 128)
+03:00:11 | INFO     |     labels shape        : (1584,)
+03:00:11 | INFO     |     Tokenization done   : 0.14s
+03:00:11 | INFO     |   Tokenizing [val] — 340 samples...
+03:00:11 | INFO     |     input_ids shape     : (340, 128)
+03:00:11 | INFO     |     attention_mask shape: (340, 128)
+03:00:11 | INFO     |     labels shape        : (340,)
+03:00:11 | INFO     |     Tokenization done   : 0.06s
+03:00:11 | INFO     |   Tokenizing [test] — 340 samples...
+03:00:11 | INFO     |     input_ids shape     : (340, 128)
+03:00:11 | INFO     |     attention_mask shape: (340, 128)
+03:00:11 | INFO     |     labels shape        : (340,)
+03:00:11 | INFO     |     Tokenization done   : 0.04s
+03:00:11 | INFO     | =================================================================
+03:00:11 | INFO     |   4 / 6  — Model
+03:00:11 | INFO     | =================================================================
+03:00:11 | INFO     |   Loading: ProsusAI/finbert
+03:00:11 | INFO     |   Task   : SequenceClassification (3 labels)
+03:00:12 | INFO     |   Model loaded in 1.32s
+03:00:12 | INFO     |   Architecture     : bert
+03:00:12 | INFO     |   Hidden size      : 768
+03:00:12 | INFO     |   Attention heads  : 12
+03:00:12 | INFO     |   Transformer layers: 12
+03:00:12 | INFO     |   Total params     : 109,484,547
+03:00:12 | INFO     |   Trainable params : 109,484,547
+03:00:12 | INFO     |   Frozen params    : 0
+03:00:12 | INFO     |   Strategy         : Full fine-tuning (no PEFT/LoRA)
+03:00:12 | INFO     | =================================================================
+03:00:12 | INFO     |   5 / 6  — Training
+03:00:12 | INFO     | =================================================================
+03:00:12 | INFO     |   output_dir      : /Users/arin/Documents/Finance/training/finbert_finetuned
+03:00:12 | INFO     |   eval_strategy   : IntervalStrategy.EPOCH
+03:00:12 | INFO     |   save_strategy   : SaveStrategy.NO
+03:00:12 | INFO     |   logging_steps   : 10
+03:00:12 | INFO     |   early_stopping  : patience=2 epochs
+03:00:12 | INFO     |   best model      : loaded at end (metric=F1)
+03:00:13 | INFO     |   Steps per epoch  : ~99
+03:00:13 | INFO     |   Total steps      : 495
+03:00:13 | INFO     |   Warmup steps     : N/A
+03:00:13 | INFO     | ── Epoch 1 / 5  — Training ────────────────────────────────
+03:00:21 | INFO     |     step   10  (2% total) | loss: 3.5171 | lr: 3.600e-06
+03:00:29 | INFO     |     step   20  (4% total) | loss: 2.9782 | lr: 7.600e-06
+03:00:37 | INFO     |     step   30  (6% total) | loss: 1.8883 | lr: 1.160e-05
+03:00:45 | INFO     |     step   40  (8% total) | loss: 1.1480 | lr: 1.560e-05
+03:00:53 | INFO     |     step   50  (10% total) | loss: 0.6021 | lr: 1.960e-05
+03:01:01 | INFO     |     step   60  (12% total) | loss: 0.4123 | lr: 1.960e-05
+03:01:09 | INFO     |     step   70  (14% total) | loss: 0.4032 | lr: 1.915e-05
+03:01:17 | INFO     |     step   80  (16% total) | loss: 0.2547 | lr: 1.870e-05
+03:01:25 | INFO     |     step   90  (18% total) | loss: 0.3802 | lr: 1.825e-05
+03:01:32 | INFO     |   Epoch 1 summary:
+03:01:32 | INFO     |     avg train loss : 1.2871
+03:01:32 | INFO     |     val accuracy   : N/A
+03:01:32 | INFO     |     val macro-F1   : N/A
+03:01:32 | INFO     |     best F1 so far : 0.0000
+03:01:37 | INFO     |     accuracy  : 0.9353
+03:01:37 | INFO     |     macro-F1  : 0.8965
+03:01:37 | INFO     |     F1[negative]: 0.8333
+03:01:37 | INFO     |     F1[neutral ]: 0.9855
+03:01:37 | INFO     |     F1[positive]: 0.8706
+03:01:37 | INFO     | ── Epoch 1 — Evaluation ───────────────────────────────────
+03:01:37 | INFO     | ── Epoch 2 / 5  — Training ────────────────────────────────
+03:01:37 | INFO     |     step  100  (20% total) | loss: 0.2219 | lr: 1.780e-05
+03:01:45 | INFO     |     step  110  (22% total) | loss: 0.1774 | lr: 1.735e-05
+03:01:53 | INFO     |     step  120  (24% total) | loss: 0.1297 | lr: 1.690e-05
+03:02:01 | INFO     |     step  130  (26% total) | loss: 0.1155 | lr: 1.645e-05
+03:02:09 | INFO     |     step  140  (28% total) | loss: 0.0816 | lr: 1.600e-05
+03:02:17 | INFO     |     step  150  (30% total) | loss: 0.1166 | lr: 1.555e-05
+03:02:25 | INFO     |     step  160  (32% total) | loss: 0.0868 | lr: 1.510e-05
+03:02:33 | INFO     |     step  170  (34% total) | loss: 0.0483 | lr: 1.465e-05
+03:02:41 | INFO     |     step  180  (36% total) | loss: 0.0928 | lr: 1.420e-05
+03:02:49 | INFO     |     step  190  (38% total) | loss: 0.1059 | lr: 1.375e-05
+03:02:55 | INFO     |   Epoch 2 summary:
+03:02:55 | INFO     |     avg train loss : 0.1177
+03:02:55 | INFO     |     val accuracy   : 0.9353
+03:02:55 | INFO     |     val macro-F1   : 0.8965
+03:02:55 | INFO     |     best F1 so far : 0.8965
+03:03:00 | INFO     |     accuracy  : 0.9588
+03:03:00 | INFO     |     macro-F1  : 0.9457
+03:03:00 | INFO     |     F1[negative]: 0.9362
+03:03:00 | INFO     |     F1[neutral ]: 0.9805
+03:03:00 | INFO     |     F1[positive]: 0.9205
+03:03:00 | INFO     | ── Epoch 2 — Evaluation ───────────────────────────────────
+03:03:00 | INFO     | ── Epoch 3 / 5  — Training ────────────────────────────────
+03:03:01 | INFO     |     step  200  (40% total) | loss: 0.1159 | lr: 1.330e-05
+03:03:09 | INFO     |     step  210  (42% total) | loss: 0.0374 | lr: 1.285e-05
+03:03:17 | INFO     |     step  220  (44% total) | loss: 0.0229 | lr: 1.240e-05
+03:03:25 | INFO     |     step  230  (46% total) | loss: 0.0400 | lr: 1.196e-05
+03:03:33 | INFO     |     step  240  (48% total) | loss: 0.0155 | lr: 1.151e-05
+03:03:41 | INFO     |     step  250  (51% total) | loss: 0.0145 | lr: 1.106e-05
+03:03:49 | INFO     |     step  260  (53% total) | loss: 0.0521 | lr: 1.061e-05
+03:03:57 | INFO     |     step  270  (55% total) | loss: 0.0362 | lr: 1.016e-05
+03:04:05 | INFO     |     step  280  (57% total) | loss: 0.0085 | lr: 9.708e-06
+03:04:13 | INFO     |     step  290  (59% total) | loss: 0.0544 | lr: 9.258e-06
+03:04:18 | INFO     |   Epoch 3 summary:
+03:04:18 | INFO     |     avg train loss : 0.0397
+03:04:18 | INFO     |     val accuracy   : 0.9588
+03:04:18 | INFO     |     val macro-F1   : 0.9457
+03:04:18 | INFO     |     best F1 so far : 0.9457
+03:04:23 | INFO     |     accuracy  : 0.9882
+03:04:23 | INFO     |     macro-F1  : 0.9803
+03:04:23 | INFO     |     F1[negative]: 0.9663
+03:04:23 | INFO     |     F1[neutral ]: 0.9976
+03:04:23 | INFO     |     F1[positive]: 0.9770
+03:04:23 | INFO     | ── Epoch 3 — Evaluation ───────────────────────────────────
+03:04:23 | INFO     | ── Epoch 4 / 5  — Training ────────────────────────────────
+03:04:25 | INFO     |     step  300  (61% total) | loss: 0.0114 | lr: 8.809e-06
+03:04:33 | INFO     |     step  310  (63% total) | loss: 0.0334 | lr: 8.360e-06
+03:04:41 | INFO     |     step  320  (65% total) | loss: 0.0353 | lr: 7.910e-06
+03:04:49 | INFO     |     step  330  (67% total) | loss: 0.0482 | lr: 7.461e-06
+03:04:57 | INFO     |     step  340  (69% total) | loss: 0.0043 | lr: 7.011e-06
+03:05:05 | INFO     |     step  350  (71% total) | loss: 0.0044 | lr: 6.562e-06
+03:05:13 | INFO     |     step  360  (73% total) | loss: 0.0043 | lr: 6.112e-06
+03:05:21 | INFO     |     step  370  (75% total) | loss: 0.0065 | lr: 5.663e-06
+03:05:29 | INFO     |     step  380  (77% total) | loss: 0.0211 | lr: 5.213e-06
+03:05:37 | INFO     |     step  390  (79% total) | loss: 0.0155 | lr: 4.764e-06
+03:05:41 | INFO     |   Epoch 4 summary:
+03:05:41 | INFO     |     avg train loss : 0.0184
+03:05:41 | INFO     |     val accuracy   : 0.9882
+03:05:41 | INFO     |     val macro-F1   : 0.9803
+03:05:41 | INFO     |     best F1 so far : 0.9803
+03:05:46 | INFO     |     accuracy  : 0.9824
+03:05:46 | INFO     |     macro-F1  : 0.9751
+03:05:46 | INFO     |     F1[negative]: 0.9670
+03:05:46 | INFO     |     F1[neutral ]: 0.9928
+03:05:46 | INFO     |     F1[positive]: 0.9655
+03:05:46 | INFO     | ── Epoch 4 — Evaluation ───────────────────────────────────
+03:05:46 | INFO     | ── Epoch 5 / 5  — Training ────────────────────────────────
+03:05:49 | INFO     |     step  400  (81% total) | loss: 0.0043 | lr: 4.315e-06
+03:05:57 | INFO     |     step  410  (83% total) | loss: 0.0035 | lr: 3.865e-06
+03:06:05 | INFO     |     step  420  (85% total) | loss: 0.0042 | lr: 3.416e-06
+03:06:13 | INFO     |     step  430  (87% total) | loss: 0.0137 | lr: 2.966e-06
+03:06:21 | INFO     |     step  440  (89% total) | loss: 0.0425 | lr: 2.517e-06
+03:06:29 | INFO     |     step  450  (91% total) | loss: 0.0042 | lr: 2.067e-06
+03:06:37 | INFO     |     step  460  (93% total) | loss: 0.0031 | lr: 1.618e-06
+03:06:45 | INFO     |     step  470  (95% total) | loss: 0.0069 | lr: 1.169e-06
+03:06:53 | INFO     |     step  480  (97% total) | loss: 0.0067 | lr: 7.191e-07
+03:07:01 | INFO     |     step  490  (99% total) | loss: 0.0033 | lr: 2.697e-07
+03:07:05 | INFO     |   Epoch 5 summary:
+03:07:05 | INFO     |     avg train loss : 0.0092
+03:07:05 | INFO     |     val accuracy   : 0.9824
+03:07:05 | INFO     |     val macro-F1   : 0.9751
+03:07:05 | INFO     |     best F1 so far : 0.9803
+03:07:10 | INFO     |     accuracy  : 0.9647
+03:07:10 | INFO     |     macro-F1  : 0.9509
+03:07:10 | INFO     |     F1[negative]: 0.9362
+03:07:10 | INFO     |     F1[neutral ]: 0.9854
+03:07:10 | INFO     |     F1[positive]: 0.9310
+03:07:10 | INFO     | ── Epoch 5 — Evaluation ───────────────────────────────────
+03:07:10 | INFO     |   Training finished at step 495
+03:07:10 | INFO     |   Best checkpoint  : None
+03:07:10 | INFO     |   Best metric: N/A
+03:07:10 | INFO     | =================================================================
+03:07:10 | INFO     |   Training complete.
+03:07:10 | INFO     |   Total steps      : 495
+03:07:10 | INFO     |   Wall time        : 417.8s  (7.0 min)
+03:07:10 | INFO     |   Train runtime    : 417.6s
+03:07:10 | INFO     |   Samples / sec    : 19.0
+03:07:10 | INFO     |   Steps / sec      : 1.19
+03:07:10 | INFO     |   Final train loss : 0.2714
+03:07:10 | INFO     | =================================================================
+03:07:10 | INFO     |   6 / 6  — Test Evaluation
+03:07:10 | INFO     | =================================================================
+03:07:10 | INFO     |   Running inference on held-out test set...
+03:07:15 | INFO     |     accuracy  : 0.9735
+03:07:15 | INFO     |     macro-F1  : 0.9626
+03:07:15 | INFO     |     F1[negative]: 0.9462
+03:07:15 | INFO     |     F1[neutral ]: 0.9880
+03:07:15 | INFO     |     F1[positive]: 0.9535
+03:07:15 | INFO     |   Inference done in 5.23s
+03:07:15 | INFO     | ── Test Results ───────────────────────────────────────────
+03:07:15 | INFO     |   Accuracy   : 0.9735
+03:07:15 | INFO     |   Macro-F1   : 0.9626
+03:07:15 | INFO     |   F1[negative]: 0.9462
+03:07:15 | INFO     |   F1[neutral ]: 0.9880
+03:07:15 | INFO     |   F1[positive]: 0.9535
+03:07:15 | INFO     | 
+              precision    recall  f1-score   support
+
+    negative       0.94      0.96      0.95        46
+     neutral       1.00      0.98      0.99       209
+    positive       0.94      0.96      0.95        85
+
+    accuracy                           0.97       340
+   macro avg       0.96      0.97      0.96       340
+weighted avg       0.97      0.97      0.97       340
+
+03:07:15 | INFO     |   Confusion matrix (rows=actual, cols=predicted):
+03:07:15 | INFO     |   Labels: ['negative', 'neutral', 'positive']
+03:07:15 | INFO     | 
+[[ 44   0   2]
+ [  1 205   3]
+ [  2   1  82]]
+03:07:15 | INFO     |   Metrics JSON → /Users/arin/Documents/Finance/training/metrics/metrics.json
+03:07:15 | INFO     |   Generating metrics plot...

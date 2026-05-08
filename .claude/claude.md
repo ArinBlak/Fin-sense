@@ -1,0 +1,1 @@
+All the necessary source of truth documents are in the SOT folder please refer to them

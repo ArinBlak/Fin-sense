@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Poppins', sans-serif;
+  --color-dark-bg: #081F30;
+  --color-bg: #15293A;
+  --color-popup: #214055;
+  --color-brand-green: #28B098;
+  --color-brand-blue: #2497F9;
+  --color-dark-gray: #456E8A;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: #081F30;
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+}
+
+/* gradient utilities */
+.btn-gradient {
+  background: linear-gradient(135deg, #14799D, #29C39B);
+}
+.btn-gradient:hover {
+  background: linear-gradient(135deg, #29C39B, #14799D);
+}
