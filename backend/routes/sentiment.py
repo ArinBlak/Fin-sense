@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 from pathlib import Path
+import os
 import torch
 import numpy as np
 
@@ -11,7 +12,8 @@ from .. import models, schemas
 
 router = APIRouter(prefix="/sentiment", tags=["Sentiment"])
 
-MODEL_PATH = Path(__file__).resolve().parent.parent.parent / "training" / "finbert_finetuned" / "best"
+HF_MODEL_ID  = "Arindam3453/finsense-finbert"
+_LOCAL_PATH  = Path(__file__).resolve().parent.parent.parent / "training" / "finbert_finetuned" / "best"
 
 _tokenizer = None
 _model     = None
@@ -21,10 +23,10 @@ def _load_model():
     global _tokenizer, _model
     if _model is None:
         from transformers import AutoTokenizer, AutoModelForSequenceClassification
-        if not MODEL_PATH.exists():
-            raise RuntimeError(f"Fine-tuned model not found at {MODEL_PATH}. Run training first.")
-        _tokenizer = AutoTokenizer.from_pretrained(str(MODEL_PATH))
-        _model     = AutoModelForSequenceClassification.from_pretrained(str(MODEL_PATH))
+        # prefer local if available (dev), fall back to HF Hub (production)
+        source = str(_LOCAL_PATH) if _LOCAL_PATH.exists() else HF_MODEL_ID
+        _tokenizer = AutoTokenizer.from_pretrained(source)
+        _model     = AutoModelForSequenceClassification.from_pretrained(source)
         _model.eval()
 
 
