@@ -23,6 +23,12 @@ body {
 #root {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+#root > * {
+  flex: 1;
 }
 
 /* gradient utilities */
