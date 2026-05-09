@@ -32,11 +32,11 @@ app.include_router(sentiment.router)
 app.include_router(training.router)
 
 
-@app.get("/", tags=["Health"])
+@app.api_route("/", methods=["GET", "HEAD"], tags=["Health"])
 def root():
     return {"status": "ok", "service": "FinSense API", "version": "1.0.0"}
 
 
-@app.get("/health", tags=["Health"])
+@app.api_route("/health", methods=["GET", "HEAD"], tags=["Health"])
 def health():
     return {"status": "healthy"}

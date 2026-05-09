@@ -1,0 +1,11 @@
+# Training only (local)
+-r requirements.txt
+torch
+transformers
+datasets<3.0.0
+accelerate
+scikit-learn
+matplotlib
+seaborn
+numpy
+yfinance

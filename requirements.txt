@@ -1,15 +1,4 @@
-yfinance
-pandas
-datasets<3.0.0
-python-dotenv
-earningscall
-transformers
-torch
-scikit-learn
-accelerate
-matplotlib
-seaborn
-numpy
+# Backend (production / Docker)
 fastapi
 uvicorn[standard]
 sqlalchemy
@@ -19,3 +8,7 @@ passlib[bcrypt]
 bcrypt==4.0.1
 python-multipart
 email-validator
+python-dotenv
+requests
+earningscall
+pandas

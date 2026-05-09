@@ -1,10 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-from pathlib import Path
 import os
-import torch
-import numpy as np
+import requests as http
 
 from ..database import get_db
 from ..deps import get_current_user
@@ -12,37 +10,24 @@ from .. import models, schemas
 
 router = APIRouter(prefix="/sentiment", tags=["Sentiment"])
 
-HF_MODEL_ID  = "Arindam3453/finsense-finbert"
-_LOCAL_PATH  = Path(__file__).resolve().parent.parent.parent / "training" / "finbert_finetuned" / "best"
-
-_tokenizer = None
-_model     = None
-
-
-def _load_model():
-    global _tokenizer, _model
-    if _model is None:
-        from transformers import AutoTokenizer, AutoModelForSequenceClassification
-        # prefer local if available (dev), fall back to HF Hub (production)
-        source = str(_LOCAL_PATH) if _LOCAL_PATH.exists() else HF_MODEL_ID
-        _tokenizer = AutoTokenizer.from_pretrained(source)
-        _model     = AutoModelForSequenceClassification.from_pretrained(source)
-        _model.eval()
+HF_API_URL = "https://api-inference.huggingface.co/models/Arindam3453/finsense-finbert"
 
 
 def _predict(text: str) -> dict:
-    _load_model()
-    inputs = _tokenizer(text, return_tensors="pt", truncation=True, max_length=128, padding=True)
-    with torch.no_grad():
-        logits = _model(**inputs).logits
-    probs  = torch.softmax(logits, dim=-1).squeeze().numpy()
-    labels = ["negative", "neutral", "positive"]
-    label  = labels[int(np.argmax(probs))]
+    token = os.getenv("HF_TOKEN", "")
+    headers = {"Authorization": f"Bearer {token}"} if token else {}
+    resp = http.post(HF_API_URL, headers=headers, json={"inputs": text}, timeout=30)
+    if resp.status_code == 503:
+        raise HTTPException(status_code=503, detail="Model is loading on HF, retry in ~20s")
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"HF Inference API error: {resp.text}")
+    scores = {item["label"]: item["score"] for item in resp.json()[0]}
+    label  = max(scores, key=scores.get)
     return {
         "label":          label,
-        "score_negative": float(probs[0]),
-        "score_neutral":  float(probs[1]),
-        "score_positive": float(probs[2]),
+        "score_negative": scores.get("negative", 0.0),
+        "score_neutral":  scores.get("neutral",  0.0),
+        "score_positive": scores.get("positive", 0.0),
     }
 
 
@@ -52,10 +37,7 @@ def analyze_sentiment(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
-    try:
-        result = _predict(payload.text)
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e))
+    result = _predict(payload.text)
 
     ticker_id = None
     if payload.ticker_symbol:
