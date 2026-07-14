@@ -1,8 +1,21 @@
 import { useState, useEffect } from 'react'
-import { Download, ChevronDown, ChevronUp } from 'lucide-react'
+import { Download, ChevronDown, ChevronUp, BarChart2, Loader } from 'lucide-react'
 import Card from '../components/Card'
 import client from '../api/client'
 import { getTickers } from '../api/tickers'
+import { analyzeTranscript } from '../api/sentiment'
+
+const LABEL_COLOR: Record<string, string> = { positive: '#28B098', neutral: '#2497F9', negative: '#e05c5c' }
+const LABEL_BG: Record<string, string>    = { positive: '#28B09822', neutral: '#2497F922', negative: '#e05c5c22' }
+
+interface SentimentResult {
+  id: number
+  label: string
+  score_positive: number
+  score_neutral: number
+  score_negative: number
+  chunk_count: number
+}
 
 export default function Transcripts() {
   const [transcripts, setTranscripts] = useState<any[]>([])
@@ -12,6 +25,9 @@ export default function Transcripts() {
   const [expanded, setExpanded] = useState<number | null>(null)
   const [fetching, setFetching] = useState(false)
   const [msg, setMsg] = useState('')
+  const [analyzing, setAnalyzing] = useState<Record<number, boolean>>({})
+  const [sentimentMap, setSentimentMap] = useState<Record<number, SentimentResult>>({})
+  const [analysisError, setAnalysisError] = useState<Record<number, string>>({})
 
   const load = () => client.get('/transcripts').then((r) => setTranscripts(r.data))
   useEffect(() => {
@@ -31,6 +47,22 @@ export default function Transcripts() {
       setMsg(e.response?.data?.detail || 'Failed to fetch')
     } finally {
       setFetching(false)
+    }
+  }
+
+  const runAnalysis = async (transcriptId: number) => {
+    setAnalyzing((prev) => ({ ...prev, [transcriptId]: true }))
+    setAnalysisError((prev) => ({ ...prev, [transcriptId]: '' }))
+    try {
+      const r = await analyzeTranscript(transcriptId)
+      setSentimentMap((prev) => ({ ...prev, [transcriptId]: r.data }))
+    } catch (e: any) {
+      setAnalysisError((prev) => ({
+        ...prev,
+        [transcriptId]: e.response?.data?.detail || 'Analysis failed. Is the model trained?',
+      }))
+    } finally {
+      setAnalyzing((prev) => ({ ...prev, [transcriptId]: false }))
     }
   }
 
@@ -86,27 +118,103 @@ export default function Transcripts() {
         <h3 className="text-sm font-semibold text-white mb-4">{transcripts.length} Transcripts</h3>
         <div className="space-y-3">
           {transcripts.length === 0 && <p className="text-sm" style={{ color: '#456E8A' }}>No transcripts yet.</p>}
-          {transcripts.map((t) => (
-            <div key={t.id} className="rounded-xl overflow-hidden" style={{ background: '#214055' }}>
-              <button
-                className="w-full flex items-center justify-between px-4 py-3 text-sm"
-                onClick={() => setExpanded(expanded === t.id ? null : t.id)}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-white">Q{t.quarter} {t.year}</span>
-                  <span className="text-xs" style={{ color: '#456E8A' }}>Ticker #{t.ticker_id}</span>
-                </div>
-                {expanded === t.id ? <ChevronUp size={14} style={{ color: '#456E8A' }} /> : <ChevronDown size={14} style={{ color: '#456E8A' }} />}
-              </button>
-              {expanded === t.id && (
-                <div className="px-4 pb-4 border-t border-white/5">
-                  <p className="text-xs leading-relaxed mt-3" style={{ color: '#abc' }}>
-                    {t.text.slice(0, 600)}...
-                  </p>
-                </div>
-              )}
-            </div>
-          ))}
+          {transcripts.map((t) => {
+            const sentiment = sentimentMap[t.id]
+            const isAnalyzing = analyzing[t.id]
+            const err = analysisError[t.id]
+            return (
+              <div key={t.id} className="rounded-xl overflow-hidden" style={{ background: '#214055' }}>
+                <button
+                  className="w-full flex items-center justify-between px-4 py-3 text-sm"
+                  onClick={() => setExpanded(expanded === t.id ? null : t.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="font-semibold text-white">Q{t.quarter} {t.year}</span>
+                    <span className="text-xs" style={{ color: '#456E8A' }}>Ticker #{t.ticker_id}</span>
+                    {/* Show sentiment badge in collapsed state too if already analyzed */}
+                    {sentiment && expanded !== t.id && (
+                      <span
+                        className="text-xs px-2 py-0.5 rounded-full font-medium capitalize"
+                        style={{ background: LABEL_BG[sentiment.label], color: LABEL_COLOR[sentiment.label] }}
+                      >
+                        {sentiment.label}
+                      </span>
+                    )}
+                  </div>
+                  {expanded === t.id ? <ChevronUp size={14} style={{ color: '#456E8A' }} /> : <ChevronDown size={14} style={{ color: '#456E8A' }} />}
+                </button>
+
+                {expanded === t.id && (
+                  <div className="px-4 pb-4 border-t border-white/5">
+                    {/* Transcript preview */}
+                    <p className="text-xs leading-relaxed mt-3 mb-4" style={{ color: '#abc' }}>
+                      {t.text.slice(0, 600)}...
+                    </p>
+
+                    {/* Analyze button */}
+                    {!sentiment && (
+                      <div className="mb-3">
+                        {err && <p className="text-red-400 text-xs mb-2">{err}</p>}
+                        <button
+                          onClick={() => runAnalysis(t.id)}
+                          disabled={isAnalyzing}
+                          className="btn-gradient px-4 py-2 rounded-lg text-white text-xs font-medium flex items-center gap-2 disabled:opacity-60"
+                        >
+                          {isAnalyzing
+                            ? <><Loader size={12} className="animate-spin" /> Analyzing…</>
+                            : <><BarChart2 size={12} /> Analyze Sentiment</>}
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Inline sentiment result */}
+                    {sentiment && (
+                      <div className="rounded-xl p-4 mt-2" style={{ background: '#15293A' }}>
+                        <div className="flex items-center gap-3 mb-3">
+                          <span
+                            className="px-3 py-1 rounded-full text-xs font-semibold capitalize"
+                            style={{ background: LABEL_BG[sentiment.label], color: LABEL_COLOR[sentiment.label] }}
+                          >
+                            {sentiment.label}
+                          </span>
+                          <span className="text-xs" style={{ color: '#456E8A' }}>
+                            {sentiment.chunk_count} chunk{sentiment.chunk_count !== 1 ? 's' : ''} analyzed
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {[
+                            { label: 'Positive', key: 'score_positive' as const, color: '#28B098' },
+                            { label: 'Neutral',  key: 'score_neutral'  as const, color: '#2497F9' },
+                            { label: 'Negative', key: 'score_negative' as const, color: '#e05c5c' },
+                          ].map(({ label, key, color }) => (
+                            <div key={key}>
+                              <div className="flex justify-between text-xs mb-1">
+                                <span style={{ color: '#456E8A' }}>{label}</span>
+                                <span className="font-medium" style={{ color }}>{(sentiment[key] * 100).toFixed(1)}%</span>
+                              </div>
+                              <div className="h-1.5 rounded-full" style={{ background: '#214055' }}>
+                                <div
+                                  className="h-1.5 rounded-full transition-all duration-500"
+                                  style={{ width: `${sentiment[key] * 100}%`, background: color }}
+                                />
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                        <button
+                          onClick={() => setSentimentMap((prev) => { const n = { ...prev }; delete n[t.id]; return n })}
+                          className="mt-3 text-xs hover:underline"
+                          style={{ color: '#456E8A' }}
+                        >
+                          Re-analyze
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
         </div>
       </Card>
     </div>

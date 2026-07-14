@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, Field
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
 from .models import SentimentLabel, TrainingStatus
 
 
@@ -83,6 +83,10 @@ class SentimentOut(BaseModel):
 
     model_config = {"from_attributes": True}
 
+class TranscriptAnalysisOut(SentimentOut):
+    """Extends SentimentOut with extra metadata for full-transcript analysis."""
+    chunk_count: int = 0
+
 
 # ── Training ──────────────────────────────────────────────────────────────────
 class TrainingRequest(BaseModel):
@@ -102,5 +106,19 @@ class TrainingRunOut(BaseModel):
     started_at: Optional[datetime]
     finished_at: Optional[datetime]
     created_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+# ── Stock Prices ──────────────────────────────────────────────────────────────
+class StockPriceOut(BaseModel):
+    id: int
+    ticker_id: int
+    date: date
+    open: Optional[float]
+    high: Optional[float]
+    low: Optional[float]
+    close: float
+    volume: Optional[int]
 
     model_config = {"from_attributes": True}
